@@ -9,6 +9,7 @@
  * NOTE TO STUDENTS: Replace this header comment with your own header
  * comment that gives a high level description of your solution.
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -40,13 +41,7 @@ team_t team = {
 /* rounds up to the nearest multiple of ALIGNMENT */
 #define ALIGN(size) (((size) + (ALIGNMENT-1)) & ~0x7)
 
-
 #define SIZE_T_SIZE (ALIGN(sizeof(size_t)))
-/* Private global variables */
-//static char * mem_heap; // Points to first byte of heap.
-//static char * mem_brk; // Points to last byte of heap plus 1.
-//static char * mem_max_addr; // Max legal heap addr plus 1.
-static char * heap_listp;
 
 /* Basic constants and macros */
 #define WSIZE       4           // Word and header/footer size (bytes)
@@ -73,6 +68,9 @@ static char * heap_listp;
 /* Given block ptr bp, compute address of next and previous blocks */
 #define NEXT_BLKP(bp) ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))
 #define PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))
+
+/* Private global variables */
+static char * heap_listp;
 
 /* Function prototypes */
 static void * extend_heap(size_t words); 
