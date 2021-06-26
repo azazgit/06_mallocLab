@@ -84,10 +84,10 @@ void mm_free(void *ptr);
 void *mm_realloc(void *ptr, size_t size);
 static void myheapcheck();
 static void myprintblock(char * bp);
-//static void mycheckblock(char * bp);
+static void mycheckblock(char * bp);
 
 /*
- * myheapcheck - 
+ * myheapcheck - prints and checks for consistency each free/allocated block. 
  */
 static void myheapcheck() {
 
@@ -95,12 +95,13 @@ static void myheapcheck() {
 
     for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
         myprintblock(bp);
-        //mycheckblock(bp);
+        mycheckblock(bp);
     }
 }
 
 /*
- * myprintblock -  
+ * myprintblock - prints the contents of the header and footer 
+ * of block bp on a single output line.
  */
 static void myprintblock(char * bp) {
     
@@ -119,6 +120,24 @@ static void myprintblock(char * bp) {
 
     printf("footer: [%d:%c]\n", GET_SIZE(FTRP(bp)), alloc);     
 }
+
+/*
+ * mycheckblock - does consistency checking such as making sure that headers
+ * and footers have identical block sizes and allocated bits, and that all
+ * blocks are properly aligned.
+ */
+static void mycheckblock(char * bp) {
+
+    // header and footer match.
+    assert(GET_SIZE(HDRP(bp)) == GET_SIZE(FTRP(bp)));
+    assert(GET_ALLOC(HDRP(bp)) == GET_ALLOC(FTRP(bp)));
+
+    // All blocks are properly aligned.
+    assert(((unsigned long) bp) % (DSIZE) == 0); // actual size for addr?
+}
+
+
+
 
 
 /* 
