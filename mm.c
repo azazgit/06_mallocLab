@@ -85,6 +85,7 @@ void *mm_realloc(void *ptr, size_t size);
 static void myheapcheck();
 static void myprintblock(char * bp);
 static void mycheckblock(char * bp);
+static void mmheapcheck();
 
 /*
  * myheapcheck - prints and checks for consistency each free/allocated block. 
@@ -96,6 +97,20 @@ static void myheapcheck() {
     for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
         myprintblock(bp);
         mycheckblock(bp);
+    }
+}
+
+/*
+ * mmheapcheck - prints and checks for consistency each free/allocated block. 
+ */
+static void mmheapcheck() {
+
+    char * bp;
+
+    for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
+        if (bp != heap_listp) {
+            myprintblock(bp);
+        }
     }
 }
 
@@ -153,15 +168,15 @@ int mm_init(void) {
     PUT(heap_listp + (5*WSIZE), PACK(0,1));             // Epilogue header
     heap_listp += (2*WSIZE);
 
-    printf("before extend...\n");
-    myheapcheck();
+    //printf("before extend...\n");
+    //myheapcheck();
 
     // Extend the empty heap with a free block of CHUNKSIZE bytes
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL)
         return -1;
     
-    printf("after extend...\n");
-    myheapcheck();
+    //printf("after extend...\n");
+    //myheapcheck();
     return 0;
 }
 
@@ -250,8 +265,8 @@ void *mm_malloc(size_t size) {
         PUT(bp, ++request_id);
         PUT(bp + (1*(WSIZE)), payload_size); 
         
-        printf("after malloc(%d)\n", size);
-        myheapcheck();
+        //printf("after malloc(%d)\n", size);
+        //myheapcheck();
         return (bp + (2*(WSIZE)));
     }
 
@@ -263,8 +278,8 @@ void *mm_malloc(size_t size) {
     place(bp, asize);
     PUT(bp, ++request_id);
     PUT(bp + (1*(WSIZE)), payload_size); 
-    printf("after malloc(%d)\n", size);
-    myheapcheck();
+    //printf("after malloc(%d)\n", size);
+    //myheapcheck();
     
     return (bp + (2*(WSIZE)));
 }
@@ -306,7 +321,7 @@ void mm_free(void *ptr) {
     
     // Decrement to account for request_id & payload_size.
     ptr = (char *) ptr - 2*(WSIZE);
-    printf("after free(%d)\n", GET(ptr));
+    //printf("after free(%d)\n", GET(ptr));
     
     size_t size = GET_SIZE(HDRP(ptr));
 
@@ -314,7 +329,7 @@ void mm_free(void *ptr) {
     PUT(FTRP(ptr), PACK(size, 0));
     coalesce(ptr);
     
-    myheapcheck();
+    //myheapcheck();
 }
 
 /*
