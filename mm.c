@@ -108,8 +108,15 @@ static void myprintblock(char * bp) {
     if (GET_ALLOC(HDRP(bp))) {alloc = 'a';}
     else {alloc = 'f';}
 
-    printf("%c: header: [%d:%c, %d, %d] ", alloc, GET_SIZE(HDRP(bp)), alloc, 
-                GET(bp), GET(bp + (WSIZE)));
+    printf("%c: header: [%d:%c", alloc, GET_SIZE(HDRP(bp)), alloc);
+    
+    if (alloc == 'a') {
+        printf(", %d, %d] ", GET(bp), GET(bp + (WSIZE)));
+    }
+    else {
+        printf("] ");
+    }
+
     printf("footer: [%d:%c]\n", GET_SIZE(FTRP(bp)), alloc);     
 }
 
@@ -133,11 +140,14 @@ int mm_init(void) {
 
     printf("before extend...\n");
     myheapcheck();
-    exit(0);
 
     // Extend the empty heap with a free block of CHUNKSIZE bytes
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL)
         return -1;
+    
+    printf("after extend...\n");
+    myheapcheck();
+    exit(0);
     return 0;
 }
 
