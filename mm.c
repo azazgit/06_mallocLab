@@ -136,10 +136,6 @@ static void mycheckblock(char * bp) {
     assert(((unsigned long) bp) % (DSIZE) == 0); // actual size for addr?
 }
 
-
-
-
-
 /* 
  * mm_init - initialize the malloc package.
  */
@@ -166,7 +162,6 @@ int mm_init(void) {
     
     printf("after extend...\n");
     myheapcheck();
-    exit(0);
     return 0;
 }
 
@@ -233,7 +228,7 @@ static void * coalesce(void * bp) {
 void *mm_malloc(size_t size) {
     size_t asize; // Adjusted block size.
     size_t extendsize; // Amount to extend heap if no fit.
-    size_t payload_size = size; // Actual payload.
+    size_t payload_size; // Actual payload.
     char * bp;
 
     // Ignore spurious requests.
@@ -241,17 +236,22 @@ void *mm_malloc(size_t size) {
 
     // Adjust block size to include overhead and alignment reqs.
     if (size <= DSIZE){
-        asize = 2*DSIZE;
+        asize = 3*DSIZE; // 4 hdr, 4 ftr, 4 req_id, 4 size, min 8 malloc.
     }
     else {
-        asize = DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE);
+        asize = 2*WSIZE + DSIZE * ((size + (DSIZE) + (DSIZE-1)) / DSIZE);
     }
+
+    payload_size = asize - 4*WSIZE; // payload_size
 
     // Search the free list for a fit.
     if ((bp = find_fit(asize)) != NULL) {
         place(bp, asize);
-        PUT(bp, request_id);
+        PUT(bp, ++request_id);
         PUT(bp + (1*(WSIZE)), payload_size); 
+        
+        printf("after malloc(%d)\n", size);
+        myheapcheck();
         return (bp + (2*(WSIZE)));
     }
 
@@ -263,6 +263,9 @@ void *mm_malloc(size_t size) {
     place(bp, asize);
     PUT(bp, request_id);
     PUT(bp + (1*(WSIZE)), payload_size); 
+    printf("after malloc(%d)\n", size);
+    myheapcheck();
+    
     return (bp + (2*(WSIZE)));
 }
 
