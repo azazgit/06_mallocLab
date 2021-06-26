@@ -82,6 +82,27 @@ static void * find_fit(size_t asize);
 static void place(void * bp, size_t asize); 
 void mm_free(void *ptr); 
 void *mm_realloc(void *ptr, size_t size);
+void myheapcheck();
+void myprintblock(char * bp);
+void mycheckblock(char * bp);
+
+/*
+ * myheapcheck - 
+ */
+void myheapcheck() {
+
+    char * bp;
+
+    for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
+        myprintblock(bp);
+        mycheckblock(bp);
+    }
+}
+
+/*
+ * 
+ */
+
 
 /* 
  * mm_init - initialize the malloc package.
