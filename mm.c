@@ -82,14 +82,14 @@ static void * find_fit(size_t asize);
 static void place(void * bp, size_t asize); 
 void mm_free(void *ptr); 
 void *mm_realloc(void *ptr, size_t size);
-void myheapcheck();
-void myprintblock(char * bp);
-void mycheckblock(char * bp);
+static void myheapcheck();
+static void myprintblock(char * bp);
+static void mycheckblock(char * bp);
 
 /*
  * myheapcheck - 
  */
-void myheapcheck() {
+static void myheapcheck() {
 
     char * bp;
 
@@ -100,8 +100,18 @@ void myheapcheck() {
 }
 
 /*
- * 
+ * myprintblock -  
  */
+static void myprintblock(char * bp) {
+    
+    char alloc;
+    if (GET_ALLOC(HDRP(bp))) {alloc = 'a';}
+    else {alloc = 'f';}
+
+    printf("%c: header: [%d:%c, %d, %d] ", alloc, GET_SIZE(HDRP(bp)), alloc, 
+                GET(bp), GET(bp + (WSIZE)));
+    printf("footer: [%d:%c]\n", GET_SIZE(FTRP(bp)), alloc);     
+}
 
 
 /* 
@@ -115,9 +125,9 @@ int mm_init(void) {
         return -1;
     PUT(heap_listp, 0);                             // Alignment padding
     PUT(heap_listp + (1*WSIZE), PACK(DSIZE, 1));    // Prologue header
-    PUT(heap_listp + (2*WSIZE), PACK(DSIZE, 1));    // Prologue header
-    PUT(heap_listp + (3*WSIZE), request_id);        // request_id
-    PUT(heap_listp + (4*WSIZE), 0);                 // payload_size
+    PUT(heap_listp + (2*WSIZE), request_id);        // request_id
+    PUT(heap_listp + (3*WSIZE), 0);                 // payload_size
+    PUT(heap_listp + (4*WSIZE), PACK(DSIZE, 1));    // Prologue header
     PUT(heap_listp + (5*WSIZE), PACK(0,1));         // Epilogue header
     heap_listp += (2*WSIZE);
 
