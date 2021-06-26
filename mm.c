@@ -261,7 +261,7 @@ void *mm_malloc(size_t size) {
         return NULL;
     }
     place(bp, asize);
-    PUT(bp, request_id);
+    PUT(bp, ++request_id);
     PUT(bp + (1*(WSIZE)), payload_size); 
     printf("after malloc(%d)\n", size);
     myheapcheck();
@@ -305,13 +305,16 @@ static void place(void * bp, size_t asize) {
 void mm_free(void *ptr) {
     
     // Decrement to account for request_id & payload_size.
-    ptr = (char *) ptr - 2*(WSIZE);    
+    ptr = (char *) ptr - 2*(WSIZE);
+    printf("after free(%d)\n", GET(ptr));
     
     size_t size = GET_SIZE(HDRP(ptr));
 
     PUT(HDRP(ptr), PACK(size, 0));
     PUT(FTRP(ptr), PACK(size, 0));
     coalesce(ptr);
+    
+    myheapcheck();
 }
 
 /*
