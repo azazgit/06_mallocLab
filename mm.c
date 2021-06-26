@@ -71,6 +71,8 @@ team_t team = {
 
 /* Private global variables */
 static char * heap_listp;
+//static unsigned int request_id;
+
 
 /* Function prototypes */
 static void * extend_heap(size_t words); 
@@ -85,7 +87,6 @@ void *mm_realloc(void *ptr, size_t size);
  * mm_init - initialize the malloc package.
  */
 int mm_init(void) {
-    
     // Create the initial empty heap
     if ((heap_listp = mem_sbrk(4*WSIZE)) == (void *)-1)
         return -1;
@@ -135,8 +136,8 @@ static void * coalesce(void * bp) {
 
     else if (prev_alloc && !next_alloc) { // case 2
         size += GET_SIZE(HDRP(NEXT_BLKP(bp))); // Add free block's size.
-        PUT(HDRP(bp), PACK(size, 0)); // Update block's header to size || 0.
-        PUT(FTRP(bp), PACK(size, 0)); // Update block's footer to size || 0.
+        PUT(HDRP(bp), PACK(size, 0)); // Update block's header to size | 0.
+        PUT(FTRP(bp), PACK(size, 0)); // Update block's footer to size | 0.
     }
 
     else if (!prev_alloc && next_alloc) { // case 3
@@ -164,6 +165,7 @@ static void * coalesce(void * bp) {
 void *mm_malloc(size_t size) {
     size_t asize; // Adjusted block size.
     size_t extendsize; // Amount to extend heap if no fit.
+    size_t payload_size; // Actual payload.
     char * bp;
 
     // Ignore spurious requests.
@@ -180,7 +182,9 @@ void *mm_malloc(size_t size) {
     // Search the free list for a fit.
     if ((bp = find_fit(asize)) != NULL) {
         place(bp, asize);
-        return bp;
+        PUT(bp, request_id);
+        PUT(bp + (1*(WSIZE)), payload_size); 
+        return (bp + (2*(WSIZE)));
     }
 
     // No fit found. Get more memory and place the block.
@@ -189,7 +193,9 @@ void *mm_malloc(size_t size) {
         return NULL;
     }
     place(bp, asize);
-    return bp;
+    PUT(bp, request_id);
+    PUT(bp + (1*(WSIZE)), payload_size); 
+    return (bp + (2*(WSIZE)));
 }
 
 static void * find_fit(size_t asize) {
@@ -226,6 +232,10 @@ static void place(void * bp, size_t asize) {
  * mm_free - 
  */
 void mm_free(void *ptr) {
+    
+    // Decrement to account for request_id & payload_size.
+    (void *) ptr = (char *) ptr - 2*(WSIZE);    
+    
     size_t size = GET_SIZE(HDRP(ptr));
 
     PUT(HDRP(ptr), PACK(size, 0));
