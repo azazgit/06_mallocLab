@@ -71,7 +71,7 @@ team_t team = {
 
 /* Private global variables */
 static char * heap_listp;
-//static unsigned int request_id;
+static unsigned int request_id;
 
 
 /* Function prototypes */
@@ -87,13 +87,17 @@ void *mm_realloc(void *ptr, size_t size);
  * mm_init - initialize the malloc package.
  */
 int mm_init(void) {
+    request_id = -1;
+    
     // Create the initial empty heap
-    if ((heap_listp = mem_sbrk(4*WSIZE)) == (void *)-1)
+    if ((heap_listp = mem_sbrk(6*WSIZE)) == (void *)-1)
         return -1;
-    PUT(heap_listp, 0); // Alignment padding
+    PUT(heap_listp, 0);                             // Alignment padding
     PUT(heap_listp + (1*WSIZE), PACK(DSIZE, 1));    // Prologue header
     PUT(heap_listp + (2*WSIZE), PACK(DSIZE, 1));    // Prologue header
-    PUT(heap_listp + (3*WSIZE), PACK(0,1));         // Epilogue header
+    PUT(heap_listp + (3*WSIZE), request_id);        // request_id
+    PUT(heap_listp + (4*WSIZE), 0);                 // payload_size
+    PUT(heap_listp + (5*WSIZE), PACK(0,1));         // Epilogue header
     heap_listp += (2*WSIZE);
 
     // Extend the empty heap with a free block of CHUNKSIZE bytes
@@ -165,7 +169,7 @@ static void * coalesce(void * bp) {
 void *mm_malloc(size_t size) {
     size_t asize; // Adjusted block size.
     size_t extendsize; // Amount to extend heap if no fit.
-    size_t payload_size; // Actual payload.
+    size_t payload_size = size; // Actual payload.
     char * bp;
 
     // Ignore spurious requests.
@@ -234,7 +238,7 @@ static void place(void * bp, size_t asize) {
 void mm_free(void *ptr) {
     
     // Decrement to account for request_id & payload_size.
-    (void *) ptr = (char *) ptr - 2*(WSIZE);    
+    ptr = (char *) ptr - 2*(WSIZE);    
     
     size_t size = GET_SIZE(HDRP(ptr));
 
