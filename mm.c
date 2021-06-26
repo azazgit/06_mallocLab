@@ -85,7 +85,7 @@ void *mm_realloc(void *ptr, size_t size);
 static void myheapcheck();
 static void myprintblock(char * bp);
 static void mycheckblock(char * bp);
-static void mmheapcheck();
+void mm_heapcheck();
 
 /*
  * myheapcheck - prints and checks for consistency each free/allocated block. 
@@ -103,7 +103,7 @@ static void myheapcheck() {
 /*
  * mmheapcheck - prints and checks for consistency each free/allocated block. 
  */
-static void mmheapcheck() {
+void mm_heapcheck() {
 
     char * bp;
 
