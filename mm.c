@@ -84,7 +84,7 @@ void mm_free(void *ptr);
 void *mm_realloc(void *ptr, size_t size);
 static void myheapcheck();
 static void myprintblock(char * bp);
-static void mycheckblock(char * bp);
+//static void mycheckblock(char * bp);
 
 /*
  * myheapcheck - 
@@ -95,7 +95,7 @@ static void myheapcheck() {
 
     for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
         myprintblock(bp);
-        mycheckblock(bp);
+        //mycheckblock(bp);
     }
 }
 
@@ -123,13 +123,17 @@ int mm_init(void) {
     // Create the initial empty heap
     if ((heap_listp = mem_sbrk(6*WSIZE)) == (void *)-1)
         return -1;
-    PUT(heap_listp, 0);                             // Alignment padding
-    PUT(heap_listp + (1*WSIZE), PACK(DSIZE, 1));    // Prologue header
-    PUT(heap_listp + (2*WSIZE), request_id);        // request_id
-    PUT(heap_listp + (3*WSIZE), 0);                 // payload_size
-    PUT(heap_listp + (4*WSIZE), PACK(DSIZE, 1));    // Prologue header
-    PUT(heap_listp + (5*WSIZE), PACK(0,1));         // Epilogue header
+    PUT(heap_listp, 0);                                 // Alignment padding
+    PUT(heap_listp + (1*WSIZE), PACK(2*(DSIZE), 1));    // Prologue header
+    PUT(heap_listp + (2*WSIZE), request_id);            // request_id
+    PUT(heap_listp + (3*WSIZE), 0);                     // payload_size
+    PUT(heap_listp + (4*WSIZE), PACK(2*(DSIZE), 1));    // Prologue header
+    PUT(heap_listp + (5*WSIZE), PACK(0,1));             // Epilogue header
     heap_listp += (2*WSIZE);
+
+    printf("before extend...\n");
+    myheapcheck();
+    exit(0);
 
     // Extend the empty heap with a free block of CHUNKSIZE bytes
     if (extend_heap(CHUNKSIZE/WSIZE) == NULL)
