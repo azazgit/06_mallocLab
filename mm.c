@@ -69,6 +69,10 @@ team_t team = {
 #define NEXT_BLKP(bp) ((char *)(bp) + GET_SIZE(((char *)(bp) - WSIZE)))
 #define PREV_BLKP(bp) ((char *)(bp) - GET_SIZE(((char *)(bp) - DSIZE)))
 
+/* Turn off heap checker */
+//#define heapcheck(lineno) mm_heapcheck(lineno)
+#define heapcheck(lineno)
+
 /* Private global variables */
 static char * heap_listp;
 static unsigned int request_id;
