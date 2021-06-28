@@ -318,12 +318,16 @@ static void place(void * bp, size_t asize) {
  * mm_free - 
  */
 void mm_free(void *ptr) {
+
+    if (bp = 0) {return;}
     
     // Decrement to account for request_id & payload_size.
     ptr = (char *) ptr - 2*(WSIZE);
     //printf("after free(%d)\n", GET(ptr));
     
     size_t size = GET_SIZE(HDRP(ptr));
+    
+    if(heap_listp == 0); {mm_init();} // Why need this?
 
     PUT(HDRP(ptr), PACK(size, 0));
     PUT(FTRP(ptr), PACK(size, 0));
