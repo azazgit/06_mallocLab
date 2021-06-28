@@ -107,15 +107,10 @@ static void myheapcheck() {
 /*
  * mmheapcheck - prints and checks for consistency each free/allocated block. 
  */
-void mm_heapcheck() {
+void mm_heapcheck(int lineno) {
 
-    char * bp;
-
-    for (bp = heap_listp; GET_SIZE(HDRP(bp)) > 0; bp = NEXT_BLKP(bp)) {
-        if (bp != heap_listp) {
-            myprintblock(bp);
-        }
-    }
+    printf("checkheap called from %d\n", lineno);
+    
 }
 
 /*
@@ -271,6 +266,8 @@ void *mm_malloc(size_t size) {
         
         //printf("after malloc(%d)\n", size);
         //myheapcheck();
+        heapcheck(__LINE__); 
+        
         return (bp + (2*(WSIZE)));
     }
 
@@ -282,8 +279,10 @@ void *mm_malloc(size_t size) {
     place(bp, asize);
     PUT(bp, ++request_id);
     PUT(bp + (1*(WSIZE)), payload_size); 
+    
     //printf("after malloc(%d)\n", size);
     //myheapcheck();
+    heapcheck(__LINE__); 
     
     return (bp + (2*(WSIZE)));
 }
@@ -323,7 +322,7 @@ static void place(void * bp, size_t asize) {
  */
 void mm_free(void *ptr) {
 
-    if (bp = 0) {return;}
+    if (ptr == 0) {return;}
     
     // Decrement to account for request_id & payload_size.
     ptr = (char *) ptr - 2*(WSIZE);
@@ -331,12 +330,14 @@ void mm_free(void *ptr) {
     
     size_t size = GET_SIZE(HDRP(ptr));
     
-    if(heap_listp == 0); {mm_init();} // Why need this?
+    if(heap_listp == 0) { // Why need this?
+        mm_init();
+    }
 
     PUT(HDRP(ptr), PACK(size, 0));
     PUT(FTRP(ptr), PACK(size, 0));
     coalesce(ptr);
-    
+    heapcheck(__LINE__); 
     //myheapcheck();
 }
 
